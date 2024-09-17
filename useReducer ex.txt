@@ -1,0 +1,101 @@
+import React, { useReducer } from 'react';
+
+// Initial state of the form
+const initialState = {
+  name: '',
+  email: '',
+  errors: {
+    name: '',
+    email: '',
+  },
+  isSubmitting: false,
+};
+
+// Action types
+const actionTypes = {
+  UPDATE_FIELD: 'UPDATE_FIELD',
+  SET_ERRORS: 'SET_ERRORS',
+  SUBMIT_FORM: 'SUBMIT_FORM',
+};
+
+// Reducer function
+function reducer(state, action) {
+  switch (action.type) {
+    case actionTypes.UPDATE_FIELD:
+      return {
+        ...state,
+        [action.name]: action.value,
+      };
+    case actionTypes.SET_ERRORS:
+      return {
+        ...state,
+        errors: action.errors,
+      };
+    case actionTypes.SUBMIT_FORM:
+      return {
+        ...state,
+        isSubmitting: true,
+      };
+    default:
+      return state;
+  }
+}
+
+// Form component
+const SimpleForm = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    dispatch({
+      type: actionTypes.UPDATE_FIELD,
+      name: e.target.name,
+      value: e.target.value,
+    });
+  };
+
+  // Validate the form fields
+  const validate = () => {
+    const errors = { name: '', email: '' };
+    if (!state.name) errors.name = 'Name is required';
+    if (!state.email) errors.email = 'Email is required';
+    return errors;
+  };
+
+  // Handle form submission
+  const handleSubmit = () => {
+    const errors = validate();
+    dispatch({ type: actionTypes.SET_ERRORS, errors });
+    if (!errors.name && !errors.email) {
+      dispatch({ type: actionTypes.SUBMIT_FORM });
+      console.log('Form submitted:', state);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Simple Form</h2>
+      <input
+        type="text"
+        name="name"
+        value={state.name}
+        onChange={handleChange}
+        placeholder="Name"
+      />
+      <p>{state.errors.name}</p>
+      <input
+        type="email"
+        name="email"
+        value={state.email}
+        onChange={handleChange}
+        placeholder="Email"
+      />
+      <p>{state.errors.email}</p>
+      <button onClick={handleSubmit} disabled={state.isSubmitting}>
+        {state.isSubmitting ? 'Submitting...' : 'Submit'}
+      </button>
+    </div>
+  );
+};
+
+export default SimpleForm;
